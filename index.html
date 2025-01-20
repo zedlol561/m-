@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طلب رشق مشاهدات تيك توك</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        h1 {
+            color: #333;
+        }
+        input[type="text"], input[type="number"] {
+            padding: 10px;
+            width: 300px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: green;
+        }
+        #error {
+            margin-top: 20px;
+            font-size: 18px;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>طلب رشق مشاهدات تيك توك</h1>
+    <input type="text" id="videoUrl" placeholder="أدخل رابط الفيديو هنا">
+    <input type="number" id="quantity" placeholder="أدخل عدد المشاهدات المطلوبة">
+    <button onclick="placeOrder()">إتمام الطلب</button>
+
+    <div id="result"></div>
+    <div id="error"></div>
+
+    <script>
+        async function placeOrder() {
+            const videoUrl = document.getElementById('videoUrl').value;
+            const quantity = document.getElementById('quantity').value;
+
+            if (!videoUrl || !quantity) {
+                document.getElementById('error').textContent = 'الرجاء إدخال رابط الفيديو وعدد المشاهدات';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3001/api/order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ videoUrl, quantity })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`فشل في جلب البيانات: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (data.error) {
+                    document.getElementById('error').textContent = `خطأ: ${data.error}`;
+                    document.getElementById('result').textContent = '';
+                } else {
+                    document.getElementById('result').textContent = `تم إنشاء الطلب بنجاح! رقم الطلب: ${data.order}`;
+                    document.getElementById('error').textContent = '';
+                }
+            } catch (error) {
+                console.error('حدث خطأ:', error);
+                document.getElementById('error').textContent = 'حدث خطأ أثناء معالجة الطلب';
+                document.getElementById('result').textContent = '';
+            }
+        }
+    </script>
+</body>
+</html>
